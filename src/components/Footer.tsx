@@ -1,4 +1,5 @@
 import { Instagram, Facebook, Twitter } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -23,14 +24,18 @@ const Footer = () => {
               Quick Links
             </h4>
             <nav className="flex flex-col gap-2">
-              {['Collections', 'About', 'Contact', 'Care Guide'].map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(' ', '-')}`}
+              {[
+                { name: 'Collections', path: '/collections' },
+                { name: 'About', path: '/about' },
+                { name: 'Contact', path: '/contact' },
+              ].map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
                   className="font-body text-sm text-champagne hover:text-ivory transition-colors"
                 >
-                  {item}
-                </a>
+                  {item.name}
+                </Link>
               ))}
             </nav>
           </div>

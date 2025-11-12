@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,32 +27,43 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <motion.h1 
-            className="text-2xl md:text-3xl font-serif font-light tracking-widest text-leather"
-            whileHover={{ scale: 1.05 }}
-          >
-            AURA
-          </motion.h1>
+          <Link to="/">
+            <motion.h1 
+              className="text-2xl md:text-3xl font-serif font-light tracking-widest text-leather"
+              whileHover={{ scale: 1.05 }}
+            >
+              AURA
+            </motion.h1>
+          </Link>
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-8 font-body text-sm tracking-elegant">
-            {['Home', 'Collections', 'About', 'Contact'].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                className="text-leather hover:text-rosegold transition-colors elegant-underline pb-1"
+            {[
+              { name: 'Home', path: '/' },
+              { name: 'Collections', path: '/collections' },
+              { name: 'About', path: '/about' },
+              { name: 'Contact', path: '/contact' },
+            ].map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`text-leather hover:text-rosegold transition-colors elegant-underline pb-1 ${
+                  location.pathname === item.path ? 'text-rosegold' : ''
+                }`}
               >
-                {item}
-              </a>
+                {item.name}
+              </Link>
             ))}
           </div>
 
           {/* CTA Button */}
-          <Button 
-            className="bg-gradient-to-r from-rosegold to-mauve hover:shadow-hover transition-all duration-300 text-ivory font-body tracking-elegant"
-          >
-            Enquire
-          </Button>
+          <Link to="/contact">
+            <Button 
+              className="bg-gradient-to-r from-rosegold to-mauve hover:shadow-hover transition-all duration-300 text-ivory font-body tracking-elegant"
+            >
+              Enquire
+            </Button>
+          </Link>
         </div>
       </div>
     </motion.nav>
