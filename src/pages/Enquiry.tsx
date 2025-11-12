@@ -103,7 +103,7 @@ const Enquiry = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative pt-32 pb-16 px-6 bg-gradient-to-br from-champagne via-ivory to-mauve/20"
+        className="relative pt-32 pb-20 px-6 bg-gradient-to-br from-champagne via-ivory to-mauve/20"
       >
         <div className="container mx-auto max-w-2xl text-center">
           <motion.h1
@@ -118,10 +118,24 @@ const Enquiry = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-lg font-body text-taupe leading-relaxed"
+            className="text-lg font-body text-taupe leading-relaxed mb-3"
           >
-            Upload your inspiration and share your vision with our designers.
+            Upload your inspiration and receive your dream jewellery—crafted within 7 days.
           </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="text-sm font-body italic text-rosegold/80 mb-6"
+          >
+            Our 7-Day Custom Jewellery Guarantee
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+            className="w-24 h-[1px] mx-auto bg-gradient-to-r from-transparent via-rosegold to-transparent"
+          />
         </div>
       </motion.section>
 
