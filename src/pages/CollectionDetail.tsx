@@ -80,13 +80,13 @@ const CollectionDetail = () => {
   return (
     <div className="min-h-screen bg-ivory">
       <Navbar />
-
-      <main className="pt-24 pb-16">
+      
+      <main className="pt-20 sm:pt-24 pb-12 sm:pb-16">
         {/* Header */}
-        <section className="container mx-auto px-6 mb-12">
-          <Link
-            to="/collections"
-            className="inline-flex items-center gap-2 text-leather hover:text-rosegold transition-colors font-body text-sm mb-8 elegant-underline"
+        <section className="container mx-auto px-4 sm:px-6 mb-8 sm:mb-12">
+          <Link 
+            to="/collections" 
+            className="inline-flex items-center gap-2 text-leather hover:text-rosegold transition-colors font-body text-sm mb-6 sm:mb-8 elegant-underline"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Collections
@@ -97,18 +97,18 @@ const CollectionDetail = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-5xl md:text-6xl font-serif text-leather mb-4 tracking-wide">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-leather mb-3 sm:mb-4 tracking-wide">
               {collection.name}
             </h1>
-            <p className="font-body text-lg text-taupe max-w-2xl tracking-elegant">
+            <p className="font-body text-base sm:text-lg text-taupe max-w-2xl tracking-elegant">
               {collection.description}
             </p>
           </motion.div>
         </section>
 
         {/* Products Grid */}
-        <section className="container mx-auto px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <section className="container mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {collection.products.map((product: any, index: number) => (
               <Link
                 key={product.id}
