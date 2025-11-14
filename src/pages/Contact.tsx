@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -8,36 +9,49 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 
+// Validation Schema
+const ContactSchema = Yup.object().shape({
+  name: Yup.string()
+    .min(2, 'Name is too short')
+    .max(50, 'Name is too long')
+    .required('Name is required'),
+  email: Yup.string()
+    .email('Invalid email')
+    .required('Email is required'),
+  phone: Yup.string()
+    .matches(
+      /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+      'Please enter a valid phone number'
+    )
+    .required('Phone number is required'),
+  message: Yup.string()
+    .min(10, 'Message is too short')
+    .required('Message is required'),
+});
+
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const handleSubmit = async (values: { name: string; email: string; phone: string; message: string }, { setSubmitting, resetForm }: any) => {
+    try {
+      // Simulate form submission
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast({
+        title: 'Message Sent',
+        description: 'Thank you for your inquiry. We will be in touch soon.',
+      });
 
-    toast({
-      title: 'Message Sent',
-      description: 'Thank you for your inquiry. We will be in touch soon.',
-    });
-
-    setFormData({ name: '', email: '', message: '' });
-    setIsSubmitting(false);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+      resetForm();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'There was an error sending your message. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -70,60 +84,92 @@ const Contact = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-                <div>
-                  <label htmlFor="name" className="block font-body text-sm text-leather mb-2 tracking-elegant">
-                    Name
-                  </label>
-                  <Input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="bg-champagne border-taupe focus:border-rosegold focus:ring-rosegold"
-                  />
-                </div>
+              <Formik
+                initialValues={{
+                  name: '',
+                  email: '',
+                  phone: '',
+                  message: ''
+                }}
+                validationSchema={ContactSchema}
+                onSubmit={handleSubmit}
+              >
+                {({ isSubmitting, errors, touched }) => (
+                  <Form className="space-y-5 sm:space-y-6">
+                    <div>
+                      <label htmlFor="name" className="block font-body text-sm text-leather mb-2 tracking-elegant">
+                        Name
+                      </label>
+                      <Field
+                        as={Input}
+                        id="name"
+                        name="name"
+                        type="text"
+                        className={`bg-champagne border-taupe focus:border-rosegold focus:ring-rosegold ${
+                          errors.name && touched.name ? 'border-red-500' : ''
+                        }`}
+                      />
+                      <ErrorMessage name="name" component="div" className="text-red-500 text-sm mt-1" />
+                    </div>
 
-                <div>
-                  <label htmlFor="email" className="block font-body text-sm text-leather mb-2 tracking-elegant">
-                    Email
-                  </label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="bg-champagne border-taupe focus:border-rosegold focus:ring-rosegold"
-                  />
-                </div>
+                    <div>
+                      <label htmlFor="email" className="block font-body text-sm text-leather mb-2 tracking-elegant">
+                        Email
+                      </label>
+                      <Field
+                        as={Input}
+                        id="email"
+                        name="email"
+                        type="email"
+                        className={`bg-champagne border-taupe focus:border-rosegold focus:ring-rosegold ${
+                          errors.email && touched.email ? 'border-red-500' : ''
+                        }`}
+                      />
+                      <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
+                    </div>
 
-                <div>
-                  <label htmlFor="message" className="block font-body text-sm text-leather mb-2 tracking-elegant">
-                    Message
-                  </label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    required
-                    rows={6}
-                    value={formData.message}
-                    onChange={handleChange}
-                    className="bg-champagne border-taupe focus:border-rosegold focus:ring-rosegold resize-none"
-                  />
-                </div>
+                    <div>
+                      <label htmlFor="phone" className="block font-body text-sm text-leather mb-2 tracking-elegant">
+                        Phone Number
+                      </label>
+                      <Field
+                        as={Input}
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        className={`bg-champagne border-taupe focus:border-rosegold focus:ring-rosegold ${
+                          errors.phone && touched.phone ? 'border-red-500' : ''
+                        }`}
+                      />
+                      <ErrorMessage name="phone" component="div" className="text-red-500 text-sm mt-1" />
+                    </div>
 
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-rosegold to-mauve hover:shadow-hover transition-all duration-300 text-ivory font-body tracking-elegant h-12 sm:h-auto py-3 sm:py-2"
-                >
-                  {isSubmitting ? 'Sending...' : 'Send Message'}
-                </Button>
-              </form>
+                    <div>
+                      <label htmlFor="message" className="block font-body text-sm text-leather mb-2 tracking-elegant">
+                        Message
+                      </label>
+                      <Field
+                        as={Textarea}
+                        id="message"
+                        name="message"
+                        rows={6}
+                        className={`bg-champagne border-taupe focus:border-rosegold focus:ring-rosegold resize-none ${
+                          errors.message && touched.message ? 'border-red-500' : ''
+                        }`}
+                      />
+                      <ErrorMessage name="message" component="div" className="text-red-500 text-sm mt-1" />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-gradient-to-r from-rosegold to-mauve hover:shadow-hover transition-all duration-300 text-ivory font-body tracking-elegant h-12 sm:h-auto py-3 sm:py-2"
+                    >
+                      {isSubmitting ? 'Sending...' : 'Send Message'}
+                    </Button>
+                  </Form>
+                )}
+              </Formik>
             </motion.div>
 
             <motion.div

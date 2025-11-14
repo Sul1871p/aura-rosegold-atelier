@@ -9,25 +9,60 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
 const Enquiry = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // Yup Validation Schema
+  const validationSchema = Yup.object({
+    name: Yup.string().required("Please enter your name"),
+    email: Yup.string().email("Invalid email address").required("Please enter your email"),
+    phone: Yup.string()
+      .matches(/^[0-9+\-\s]+$/, "Invalid phone number")
+      .required("Please enter your phone number"),
+    message: Yup.string().required("Please enter a message"),
+  });
 
+  // Formik Setup
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      email: "",
+      phone: "",
+      message: "",
+    },
+    validationSchema,
+    onSubmit: () => {
+      const { name, email, phone, message } = formik.values;
+
+      const formattedMessage =
+        `*Name:* ${name}%0A` +
+        `*Email:* ${email}%0A` +
+        `*Phone:* ${phone}%0A` +
+        `*Message:* ${message}%0A` +
+        `_This enquiry was sent from Labbaik website_`;
+
+      const phoneNumber = "9834174885";
+
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${formattedMessage}`;
+
+      toast({
+        title: "Redirecting to WhatsApp...",
+        description: "Please complete your enquiry on WhatsApp.",
+      });
+
+      window.open(whatsappUrl, "_blank");
+    },
+  });
+
+  // Image upload
   const handleImageUpload = (file: File) => {
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result as string);
-      };
+      reader.onloadend = () => setUploadedImage(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
@@ -37,49 +72,11 @@ const Enquiry = () => {
     if (file) handleImageUpload(file);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
     if (file) handleImageUpload(file);
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const removeImage = () => {
-    setUploadedImage(null);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Simple validation
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all fields before sending your enquiry.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Show success toast
-    toast({
-      title: "Enquiry Prepared! ✨",
-      description: "Your enquiry has been prepared for WhatsApp. Redirecting...",
-    });
-
-    // Simulate WhatsApp redirect (UI only)
-    setTimeout(() => {
-      console.log('WhatsApp enquiry would be sent with:', formData, uploadedImage);
-    }, 1500);
   };
 
   const fadeUpVariants = {
@@ -87,10 +84,7 @@ const Enquiry = () => {
     visible: (i: number) => ({
       opacity: 1,
       y: 0,
-      transition: {
-        delay: i * 0.1,
-        duration: 0.6,
-      },
+      transition: { delay: i * 0.1, duration: 0.6 },
     }),
   };
 
@@ -103,186 +97,158 @@ const Enquiry = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 bg-gradient-to-br from-champagne via-ivory to-mauve/20"
+        className="relative pt-24 pb-12 px-4 bg-gradient-to-br from-champagne via-ivory to-mauve/20"
       >
         <div className="container mx-auto max-w-2xl text-center">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-light tracking-wide text-leather mb-3 sm:mb-4"
+            className="text-3xl md:text-4xl font-serif text-leather mb-3"
           >
             Personalized Adornments by <span className="font-bold">Labbaik</span>
           </motion.h1>
+
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-base sm:text-lg font-body text-taupe leading-relaxed mb-2 sm:mb-3 px-4"
+            className="text-base text-taupe mb-3"
           >
             Upload your inspiration and receive your dream jewellery—crafted within 7 days.
           </motion.p>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-            className="text-xs sm:text-sm font-body italic text-rosegold/80 mb-4 sm:mb-6"
-          >
-            Our 7-Day Custom Jewellery Guarantee
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-            className="w-24 h-[1px] mx-auto bg-gradient-to-r from-transparent via-rosegold to-transparent"
-          />
         </div>
       </motion.section>
 
-      {/* Enquiry Form Section */}
-      <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6">
+      {/* Form Section */}
+      <section className="py-12 px-4">
         <div className="container mx-auto max-w-2xl">
-          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-            {/* Name Field */}
-            <motion.div
-              custom={0}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeUpVariants}
-            >
-              <Label htmlFor="name" className="text-leather font-body text-sm uppercase tracking-elegant mb-2 block">
-                Your Name
-              </Label>
+          <form onSubmit={formik.handleSubmit} className="space-y-8">
+
+            {/* Name */}
+            <motion.div custom={0} initial="hidden" whileInView="visible" variants={fadeUpVariants}>
+              <Label>Your Name</Label>
               <Input
                 id="name"
                 name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="bg-champagne/30 border-taupe/30 focus:border-rosegold text-leather placeholder:text-taupe/60"
+                value={formik.values.name}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="bg-champagne/30 border-taupe/30"
                 placeholder="Enter your full name"
               />
+              {formik.touched.name && formik.errors.name && (
+                <p className="text-red-500 text-sm mt-1">{formik.errors.name}</p>
+              )}
             </motion.div>
 
-            {/* Email Field */}
-            <motion.div
-              custom={1}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeUpVariants}
-            >
-              <Label htmlFor="email" className="text-leather font-body text-sm uppercase tracking-elegant mb-2 block">
-                Email Address
-              </Label>
+            {/* Email */}
+            <motion.div custom={1} initial="hidden" whileInView="visible" variants={fadeUpVariants}>
+              <Label>Email Address</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="bg-champagne/30 border-taupe/30 focus:border-rosegold text-leather placeholder:text-taupe/60"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="bg-champagne/30"
                 placeholder="your.email@example.com"
               />
+              {formik.touched.email && formik.errors.email && (
+                <p className="text-red-500 text-sm mt-1">{formik.errors.email}</p>
+              )}
             </motion.div>
 
-            {/* Message Field */}
-            <motion.div
-              custom={2}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeUpVariants}
-            >
-              <Label htmlFor="message" className="text-leather font-body text-sm uppercase tracking-elegant mb-2 block">
-                Design Details / Message
-              </Label>
+            {/* Phone */}
+            <motion.div custom={2} initial="hidden" whileInView="visible" variants={fadeUpVariants}>
+              <Label>Phone Number</Label>
+              <Input
+                id="phone"
+                name="phone"
+                value={formik.values.phone}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="bg-champagne/30"
+                placeholder="+91 98765 43210"
+              />
+              {formik.touched.phone && formik.errors.phone && (
+                <p className="text-red-500 text-sm mt-1">{formik.errors.phone}</p>
+              )}
+            </motion.div>
+
+            {/* Message */}
+            <motion.div custom={3} initial="hidden" whileInView="visible" variants={fadeUpVariants}>
+              <Label>Design Details / Message</Label>
               <Textarea
                 id="message"
                 name="message"
-                value={formData.message}
-                onChange={handleInputChange}
-                className="bg-champagne/30 border-taupe/30 focus:border-rosegold text-leather placeholder:text-taupe/60 min-h-[120px]"
-                placeholder="Tell us about your vision, preferred materials, size, or any reference details..."
+                value={formik.values.message}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="bg-champagne/30 min-h-[120px]"
+                placeholder="Describe your design idea..."
               />
+              {formik.touched.message && formik.errors.message && (
+                <p className="text-red-500 text-sm mt-1">{formik.errors.message}</p>
+              )}
             </motion.div>
 
-            {/* Image Upload */}
-            <motion.div
-              custom={3}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeUpVariants}
-            >
-              <Label className="text-leather font-body text-sm uppercase tracking-elegant mb-2 block">
-                Upload Reference Image
-              </Label>
-              
+            {/* Image Upload — FIXED (No screen overlay issue) */}
+            <motion.div custom={4} initial="hidden" whileInView="visible" variants={fadeUpVariants}>
+              <Label>Upload Reference Image</Label>
+
               {!uploadedImage ? (
-                <div
+                <label
                   onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  className={`relative border-2 border-dashed rounded-lg p-8 transition-all duration-300 ${
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  className={`relative block border-2 border-dashed rounded-lg p-8 cursor-pointer transition ${
                     isDragging
-                      ? 'border-rosegold bg-mauve/20'
-                      : 'border-taupe/40 bg-champagne/20 hover:border-rosegold/60 hover:bg-mauve/10'
+                      ? "border-rosegold bg-mauve/20"
+                      : "border-taupe/40 bg-champagne/20"
                   }`}
                 >
                   <input
                     type="file"
-                    id="image-upload"
-                    accept=".jpg,.jpeg,.png"
+                    accept="image/*"
                     onChange={handleFileSelect}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    className="hidden"
                   />
-                  <div className="flex flex-col items-center justify-center text-center">
-                    <Upload className="w-12 h-12 text-rosegold mb-4" />
-                    <p className="font-body text-leather mb-2">
-                      Drag & drop your image here, or click to browse
-                    </p>
-                    <p className="font-body text-sm text-taupe">
-                      Accepts JPG, JPEG, PNG (max 5MB)
-                    </p>
+
+                  <div className="text-center">
+                    <Upload className="w-12 h-12 text-rosegold mx-auto mb-4" />
+                    <p>Click or drag an image here</p>
                   </div>
-                </div>
+                </label>
               ) : (
-                <div className="relative rounded-lg overflow-hidden bg-champagne/30 p-4 shadow-soft">
+                <div className="relative p-4 bg-champagne/30 rounded-lg">
                   <button
                     type="button"
-                    onClick={removeImage}
-                    className="absolute top-2 right-2 z-10 bg-leather/80 hover:bg-leather text-ivory rounded-full p-2 transition-all duration-300"
+                    onClick={() => setUploadedImage(null)}
+                    className="absolute top-2 right-2 bg-leather/80 text-ivory p-2 rounded-full"
                   >
-                    <X className="w-4 h-4" />
+                    <X />
                   </button>
-                  <img
-                    src={uploadedImage}
-                    alt="Uploaded reference"
-                    className="w-full h-auto rounded-md"
-                  />
+                  <img src={uploadedImage} className="w-full rounded-md" alt="uploaded" />
                 </div>
               )}
             </motion.div>
 
-            {/* Submit Button */}
-            <motion.div
-              custom={4}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeUpVariants}
-              className="flex justify-center pt-6"
-            >
+            {/* Submit */}
+            <motion.div custom={5} initial="hidden" whileInView="visible" variants={fadeUpVariants}>
               <Button
                 type="submit"
-                className="bg-gradient-to-r from-rosegold to-mauve hover:shadow-hover transition-all duration-300 text-ivory font-body tracking-elegant px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base group h-12 sm:h-auto w-full sm:w-auto"
+                className="w-full bg-gradient-to-r from-rosegold to-mauve text-ivory py-5"
               >
-                <MessageSquare className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                <MessageSquare className="mr-2" />
                 Send Enquiry via WhatsApp
               </Button>
             </motion.div>
+
           </form>
         </div>
       </section>
