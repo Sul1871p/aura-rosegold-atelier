@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import signatureImg from '@/assets/signature-collection.jpg';
 import hero1 from '@/assets/hero-1.jpg';
+import { Link } from 'react-router-dom';
 
 const About = () => {
   return (
@@ -178,18 +179,18 @@ const About = () => {
                 Explore our signature collections, discover the stories woven into each design, or share your own vision with us. Whether you seek a timeless heirloom or a bespoke creation, we'll bring it to life with care, passion, and our 7-Day Custom Jewellery Guarantee.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <a
-                  href="/collections"
+                <Link
+                  to="/collections"
                   className="inline-block px-8 py-3 bg-rosegold text-ivory font-body tracking-elegant rounded-md hover:bg-leather transition-colors shadow-soft"
                 >
                   Explore Collections
-                </a>
-                <a
-                  href="/enquiry"
+                </Link>
+                <Link
+                  to="/customize"
                   className="inline-block px-8 py-3 border border-rosegold text-rosegold font-body tracking-elegant rounded-md hover:bg-rosegold hover:text-ivory transition-colors"
                 >
                   Share Your Vision
-                </a>
+                </Link>
               </div>
             </motion.div>
           </div>
