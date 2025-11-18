@@ -99,7 +99,7 @@ const ProductDetail = () => {
             .map(p => ({
                 id: p.id,
                 name: p.name,
-                price: p.price,
+                // price: p.price,
                 image: p.images[0]
             }))
         : [];
@@ -208,9 +208,9 @@ const ProductDetail = () => {
                                 {product.name}
                             </h1>
 
-                            <p className="text-2xl font-serif text-rosegold mb-6">
+                            {/* <p className="text-2xl font-serif text-rosegold mb-6">
                                 {product.price}
-                            </p>
+                            </p> */}
 
                             <p className="text-leather/90 leading-relaxed mb-8 max-w-lg">
                                 {product.description}
@@ -285,9 +285,9 @@ const ProductDetail = () => {
                                         <h3 className="font-serif text-xl text-leather mb-1 tracking-elegant group-hover:text-rosegold transition-colors">
                                             {item.name}
                                         </h3>
-                                        <p className="font-body text-taupe tracking-elegant">
+                                        {/* <p className="font-body text-taupe tracking-elegant">
                                             {item.price}
-                                        </p>
+                                        </p> */}
                                     </Link>
                                 </motion.div>
                             ))}

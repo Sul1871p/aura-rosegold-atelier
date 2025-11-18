@@ -133,9 +133,9 @@ const CollectionDetail = () => {
                   <h3 className="font-serif text-xl text-leather mb-1 tracking-elegant group-hover:text-rosegold transition-colors">
                     {product.name}
                   </h3>
-                  <p className="font-body text-taupe tracking-elegant">
+                  {/* <p className="font-body text-taupe tracking-elegant">
                     {product.price}
-                  </p>
+                  </p> */}
                 </motion.div>
               </Link>
             ))}
