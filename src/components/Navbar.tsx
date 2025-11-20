@@ -37,11 +37,10 @@ const Navbar = () => {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        location.pathname === '/' 
-          ? (isScrolled ? 'bg-ivory/90 backdrop-blur-md shadow-soft' : 'bg-ivory/25 backdrop-blur-md')
-          : 'bg-ivory/90 backdrop-blur-md shadow-soft'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${location.pathname === '/'
+        ? (isScrolled ? 'bg-ivory/90 backdrop-blur-md shadow-soft' : 'bg-ivory/25 backdrop-blur-md')
+        : 'bg-ivory/90 backdrop-blur-md shadow-soft'
+        }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
@@ -66,8 +65,21 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`text-leather hover:text-rosegold transition-colors elegant-underline pb-1 ${location.pathname === item.path ? 'text-rosegold' : ''
-                  }`}
+                className={`
+  pb-1 transition-colors elegant-underline
+  ${location.pathname === item.path
+                    ? location.pathname === '/'
+                      ? (isScrolled ? 'text-rosegold' : 'text-ivory')
+                      : 'text-rosegold'
+                    : 'text-leather'
+                  }
+  ${location.pathname === '/'
+                    ? 'hover:text-ivory'
+                    : 'hover:text-rosegold'
+                  }
+`}
+
+
               >
                 {item.name}
               </Link>
