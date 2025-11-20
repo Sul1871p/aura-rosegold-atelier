@@ -7,14 +7,14 @@ const Footer = () => {
 
   return (
     <footer className="bg-taupe border-t border-rosegold/30">
-      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8">
+      <div className="container px-6 md:px-2 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Brand */}
           <div>
             <img
               src={logoLight}
               alt="Labbaik Logo"
-              className="w-56 h-auto"
+              className="w-32 md:mx-10 mx-6 mb-6"
             />
             {/* <h3 className="text-2xl font-serif font-bold tracking-widest text-ivory mb-4">
               Labbaik
@@ -31,15 +31,15 @@ const Footer = () => {
 
           {/* Links */}
           <div>
-            <h4 className="font-body text-sm uppercase tracking-elegant text-ivory mb-4">
+            <h4 className="font-body text-sm md:text-center uppercase tracking-elegant text-ivory mb-4 mt-6">
               Quick Links
             </h4>
-            <nav className="flex flex-col gap-2">
+            <nav className="flex flex-col md:items-center gap-2">
               {[
                 { name: 'Collections', path: '/collections' },
                 { name: 'About', path: '/about' },
                 { name: 'Contact', path: '/contact' },
-                { name: 'Enquiry', path: '/enquiry' },
+                { name: 'Customize', path: '/customize' },
               ].map((item) => (
                 <Link
                   key={item.name}
@@ -54,10 +54,10 @@ const Footer = () => {
 
           {/* Social */}
           <div>
-            <h4 className="font-body text-sm uppercase tracking-elegant text-ivory mb-4">
+            <h4 className="font-body text-sm uppercase tracking-elegant text-ivory mb-4 mt-6 md:text-center">
               Follow Us
             </h4>
-            <div className="flex gap-3 sm:gap-4">
+            <div className="flex gap-3 sm:gap-4 md:justify-center">
               {[
                 { icon: Instagram, label: 'Instagram' },
                 { icon: Facebook, label: 'Facebook' },
@@ -79,7 +79,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="pt-8 border-t border-rosegold/20">
           <p className="font-body text-xs text-champagne text-center tracking-elegant">
-            © {currentYear} <span className="font-bold">Labbaik</span> Jewelry. All rights reserved.
+            © {currentYear} <span className="font-bold">Labbaik</span> Jewellers. All rights reserved.
           </p>
         </div>
       </div>

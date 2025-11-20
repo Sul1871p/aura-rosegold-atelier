@@ -87,7 +87,7 @@ const CollectionDetail = () => {
     <div className="min-h-screen bg-ivory">
       <Navbar />
 
-      <main className="pt-20 sm:pt-24 pb-12 sm:pb-16">
+      <main className="pt-24 pb-14">
         {/* HEADER */}
         <section className="container mx-auto px-4 sm:px-6 mb-8 sm:mb-12">
           <Link
