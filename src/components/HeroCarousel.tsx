@@ -92,7 +92,7 @@ const HeroCarousel = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-serif font-light text-ivory mb-3 sm:mb-4 tracking-wide"
+            className="text-4xl md:text-5xl lg:text-7xl font-serif font-light text-ivory mb-3 sm:mb-4 tracking-wide"
           >
             {heroData?.title ? (
               <PrismicRichText field={heroData.title} />
@@ -105,7 +105,7 @@ const HeroCarousel = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="text-base sm:text-lg md:text-xl font-body text-champagne mb-6 sm:mb-8 tracking-elegant"
+            className="text-base md:text-xl font-body text-ivory mb-6 tracking-elegant"
           >
             {heroData?.sub_heading ? (
               <PrismicRichText field={heroData.sub_heading} />
