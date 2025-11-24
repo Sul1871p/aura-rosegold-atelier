@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -6,8 +5,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { asText } from "@prismicio/client";
 import { usePrismicDocumentByUID } from "@/hooks/usePrismic";
-import { prismicClient } from "@/lib/prismic";
-import * as prismic from "@prismicio/client";
+import { useProducts } from "@/hooks/useProducts";
+import { useEffect } from "react";
 
 const CollectionDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -19,40 +18,27 @@ const CollectionDetail = () => {
     error: collectionError,
   } = usePrismicDocumentByUID("product_type", slug ?? "");
 
-  const [products, setProducts] = useState<any[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
+  // Fetch products for this collection
+  const { products, loadMore, hasMore, loading: loadingProducts } =
+    useProducts(collection?.id);
 
-  // Fetch products linked to this collection
+  /* ------------------------------ INFINITE SCROLL ------------------------------ */
   useEffect(() => {
-    const loadProducts = async () => {
-      if (!collection) return;
+    const handleScroll = () => {
+      const nearBottom =
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 350; // distance from bottom
 
-      try {
-        setLoadingProducts(true);
-
-        const productResults = await prismicClient.getAllByType(
-          "product_details",
-          {
-            filters: [
-              prismic.filter.at("my.product_details.category", collection.id),
-            ],
-            pageSize: 100,
-          }
-        );
-
-        setProducts(productResults);
-      } catch (err) {
-        console.error("Error fetching products:", err);
-        setProducts([]);
-      } finally {
-        setLoadingProducts(false);
+      if (nearBottom && hasMore && !loadingProducts) {
+        loadMore();
       }
     };
 
-    loadProducts();
-  }, [collection]);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loadingProducts, loadMore]);
 
-  // Loading UI
+  /* ------------------------------ LOADING COLLECTION ------------------------------ */
   if (collectionLoading) {
     return (
       <div className="min-h-screen bg-ivory flex items-center justify-center">
@@ -61,7 +47,7 @@ const CollectionDetail = () => {
     );
   }
 
-  // Not found
+  /* ------------------------------ COLLECTION NOT FOUND ------------------------------ */
   if (collectionError || !collection) {
     return (
       <div className="min-h-screen bg-ivory">
@@ -70,7 +56,10 @@ const CollectionDetail = () => {
           <h1 className="text-4xl font-serif text-leather mb-4">
             Collection Not Found
           </h1>
-          <Link to="/collections" className="text-rosegold hover:underline font-body">
+          <Link
+            to="/collections"
+            className="text-rosegold hover:underline font-body"
+          >
             Return to Collections
           </Link>
         </div>
@@ -114,7 +103,7 @@ const CollectionDetail = () => {
 
         {/* PRODUCTS GRID */}
         <section className="container mx-auto px-4 sm:px-6">
-          {loadingProducts ? (
+          {loadingProducts && products.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-leather">Loading products...</p>
             </div>
@@ -123,59 +112,67 @@ const CollectionDetail = () => {
               <p className="text-taupe">No products found for this collection.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-              {products.map((p: any, index: number) => {
-                const uid = p.uid;
-                const name = p.data.name ? (p.data.name) : 'Unnamed Product';
-                const imageUrl = p.data.images?.[0]?.image?.url || '';
-                const productCategory = slug;
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                {products.map((p: any, index: number) => {
+                  const uid = p.uid;
+                  const name = p.data.name ? p.data.name : "Unnamed Product";
+                  const imageUrl = p.data.images?.[0]?.image?.url || "";
 
-                return (
-                  <Link
-                    key={p.id}
-                    to={`/collections/${slug}/${uid}`}
-                    state={{
-                      productData: {
-                        ...p.data,
-                        uid: p.uid,  // Make sure to include the uid
-                        category: {
-                          id: collection?.id,  // The collection ID for related products
-                          slug: slug           // The collection slug for navigation
-                        }
-                      }
-                    }}
-                    className="block group"
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                  return (
+                    <Link
+                      key={p.id}
+                      to={`/collections/${slug}/${uid}`}
+                      state={{
+                        productData: {
+                          ...p.data,
+                          uid: p.uid,
+                          category: {
+                            id: collection?.id,
+                            slug: slug,
+                          },
+                        },
+                      }}
+                      className="block group"
                     >
-                      <div className="relative overflow-hidden rounded-lg shadow-soft hover:shadow-hover transition-all duration-500 mb-4">
-                        <div className="aspect-square overflow-hidden bg-champagne">
-                          {imageUrl ? (
-                            <img
-                              src={imageUrl}
-                              alt={name}
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-taupe">
-                              No image
-                            </div>
-                          )}
+                      <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                      >
+                        <div className="relative overflow-hidden rounded-lg shadow-soft hover:shadow-hover transition-all duration-500 mb-4">
+                          <div className="aspect-square overflow-hidden bg-champagne">
+                            {imageUrl ? (
+                              <img
+                                src={imageUrl}
+                                alt={name}
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-taupe">
+                                No image
+                              </div>
+                            )}
+                          </div>
+                          <div className="absolute inset-0 bg-rosegold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         </div>
-                        <div className="absolute inset-0 bg-rosegold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      </div>
 
-                      <h3 className="font-serif text-xl text-leather mb-1 tracking-elegant group-hover:text-rosegold transition-colors">
-                        {name}
-                      </h3>
-                    </motion.div>
-                  </Link>
-                );
-              })}
-            </div>
+                        <h3 className="font-serif text-xl text-leather mb-1 tracking-elegant group-hover:text-rosegold transition-colors">
+                          {name}
+                        </h3>
+                      </motion.div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* LOADING INDICATOR FOR INFINITE SCROLL */}
+              {loadingProducts && (
+                <div className="py-10 text-center text-leather">
+                  Loading more...
+                </div>
+              )}
+            </>
           )}
         </section>
       </main>
