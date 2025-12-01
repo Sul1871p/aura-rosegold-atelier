@@ -4,12 +4,18 @@ import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { asText } from "@prismicio/client";
-import { usePrismicDocumentByUID } from "@/hooks/usePrismic";
+import {
+  usePrismicDocumentByUID,
+  usePrismicDocumentsByType,
+} from "@/hooks/usePrismic";
 import { useProducts } from "@/hooks/useProducts";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const CollectionDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [selectedDesignType, setSelectedDesignType] = useState<
+    string | undefined
+  >(undefined);
 
   // Fetch the collection
   const {
@@ -19,15 +25,20 @@ const CollectionDetail = () => {
   } = usePrismicDocumentByUID("product_type", slug ?? "");
 
   // Fetch products for this collection
-  const { products, loadMore, hasMore, loading: loadingProducts } =
-    useProducts(collection?.id);
+  const {
+    products,
+    loadMore,
+    hasMore,
+    loading: loadingProducts,
+  } = useProducts(collection?.id, selectedDesignType);
+
+  const { data: designTypes } = usePrismicDocumentsByType("design_type");
 
   /* ------------------------------ INFINITE SCROLL ------------------------------ */
   useEffect(() => {
     const handleScroll = () => {
       const nearBottom =
-        window.innerHeight + window.scrollY >=
-        document.body.offsetHeight - 350; // distance from bottom
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 350; // distance from bottom
 
       if (nearBottom && hasMore && !loadingProducts) {
         loadMore();
@@ -109,10 +120,66 @@ const CollectionDetail = () => {
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-taupe">No products found for this collection.</p>
+              <p className="text-taupe">
+                No products found for this collection.
+              </p>
             </div>
           ) : (
             <>
+              {/* FILTER DROPDOWN */}
+              <div className="flex justify-end mb-8 relative z-30">
+                <div className="relative">
+                  <select
+                    value={selectedDesignType || ""}
+                    onChange={(e) =>
+                      setSelectedDesignType(e.target.value || undefined)
+                    }
+                    className="
+        appearance-none
+        px-4 py-3
+        pr-10
+        rounded-xl
+        bg-white
+        border border-leather/30
+        shadow-sm
+        text-leather font-body
+        text-sm
+        tracking-wide
+        transition-all duration-300
+        hover:border-rosegold/60
+        focus:border-rosegold
+        focus:ring-2 focus:ring-rosegold/30
+        focus:outline-none
+        relative z-30
+      "
+                  >
+                    <option value="">All Designs</option>
+
+                    {designTypes?.map((dt: any) => (
+                      <option key={dt.id} value={dt.id}>
+                        {dt.data.design_name[0].text}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Chevron Icon */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4 text-leather absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none z-30"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 {products.map((p: any, index: number) => {
                   const uid = p.uid;
