@@ -4,7 +4,7 @@ import { prismicClient } from "@/lib/prismic";
 
 export const useProducts = (
   collectionId: string | undefined,
-  designTypeId?: string
+  designTypeId?: string | undefined
 ) => {
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [visibleProducts, setVisibleProducts] = useState<any[]>([]);
@@ -34,8 +34,20 @@ export const useProducts = (
 
       /* ------------------------------ FETCH ------------------------------ */
       const response = await prismicClient.getByType("product_details", {
-        filters,
+        filters: [
+          prismic.filter.at("my.product_details.category", collectionId),
+          ...(designTypeId
+            ? [
+                prismic.filter.at(
+                  "my.product_details.design_type",
+                  designTypeId
+                ),
+              ]
+            : []),
+        ],
+
         pageSize: 100,
+        fetchLinks: ["design_type.design_name"], // 👈 ADD THIS
       });
 
       const all = response.results;

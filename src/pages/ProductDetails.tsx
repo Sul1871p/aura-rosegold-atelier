@@ -10,7 +10,10 @@ import { asText } from "@prismicio/client";
 import useProducts from "@/hooks/useProducts";
 
 const ProductDetail = () => {
-  const { slug, productUid } = useParams<{ slug: string; productUid: string }>();
+  const { slug, productUid } = useParams<{
+    slug: string;
+    productUid: string;
+  }>();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState<any>(null);
@@ -20,7 +23,8 @@ const ProductDetail = () => {
   const [currentImage, setCurrentImage] = useState(0);
 
   // Inside your ProductDetails component, after the existing state
-  const { products: relatedProducts, loading: relatedProductsLoading } = useProducts(product?.category?.id);
+  const { products: relatedProducts, loading: relatedProductsLoading } =
+    useProducts(product?.category?.id);
 
   //
   // FETCH PRODUCT + CATEGORY
@@ -31,7 +35,13 @@ const ProductDetail = () => {
         if (!productUid) return;
 
         // Fetch product
-        const productDoc = await prismicClient.getByUID("product_details", productUid);
+        const productDoc = await prismicClient.getByUID(
+          "product_details",
+          productUid,
+          {
+            fetchLinks: ["design_type.design_name"], // <-- fetch linked fields
+          }
+        );
 
         if (!productDoc) {
           navigate(`/collections/${slug}`);
@@ -76,8 +86,13 @@ const ProductDetail = () => {
       <div className="min-h-screen bg-ivory">
         <Navbar />
         <div className="container mx-auto px-6 pt-32 pb-16 text-center">
-          <h1 className="text-4xl font-serif text-leather mb-4">Product Not Found</h1>
-          <Link to={`/collections/${slug}`} className="text-rosegold hover:underline font-body">
+          <h1 className="text-4xl font-serif text-leather mb-4">
+            Product Not Found
+          </h1>
+          <Link
+            to={`/collections/${slug}`}
+            className="text-rosegold hover:underline font-body"
+          >
             Return to Products
           </Link>
         </div>
@@ -94,12 +109,14 @@ const ProductDetail = () => {
 
   const productName = product.name || "Product";
 
+  const designTypeName =
+    product?.design_type?.data?.design_name?.[0]?.text;
+
   return (
     <div className="min-h-screen bg-ivory">
       <Navbar />
 
       <main className="pt-24 pb-16">
-
         {/* BACK BUTTON */}
         <div className="container mx-auto px-6 mb-8">
           <Link
@@ -114,11 +131,9 @@ const ProductDetail = () => {
         {/* PRODUCT CONTENT */}
         <section className="container mx-auto px-6 mb-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-
             {/* IMAGE GALLERY */}
             <div className="relative">
               <div className="relative aspect-square overflow-hidden rounded-lg mb-4">
-
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={currentImage}
@@ -137,7 +152,9 @@ const ProductDetail = () => {
                     <button
                       className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-ivory/80 text-leather hover:bg-rosegold hover:text-ivory transition-all"
                       onClick={() =>
-                        setCurrentImage((i) => (i === 0 ? images.length - 1 : i - 1))
+                        setCurrentImage((i) =>
+                          i === 0 ? images.length - 1 : i - 1
+                        )
                       }
                     >
                       <ChevronLeft className="relative left-1.5" />
@@ -146,7 +163,9 @@ const ProductDetail = () => {
                     <button
                       className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-ivory/80 text-leather hover:bg-rosegold hover:text-ivory transition-all"
                       onClick={() =>
-                        setCurrentImage((i) => (i === images.length - 1 ? 0 : i + 1))
+                        setCurrentImage((i) =>
+                          i === images.length - 1 ? 0 : i + 1
+                        )
                       }
                     >
                       <ChevronRight className="relative left-2" />
@@ -161,8 +180,11 @@ const ProductDetail = () => {
                   <button
                     key={i}
                     onClick={() => setCurrentImage(i)}
-                    className={`w-20 h-20 rounded-md overflow-hidden border-2 ${currentImage === i ? "border-rosegold" : "border-transparent"
-                      }`}
+                    className={`w-20 h-20 rounded-md overflow-hidden border-2 ${
+                      currentImage === i
+                        ? "border-rosegold"
+                        : "border-transparent"
+                    }`}
                   >
                     <img src={img} className="w-full h-full object-cover" />
                   </button>
@@ -196,8 +218,19 @@ const ProductDetail = () => {
               {/* Details List */}
               {product.details?.length > 0 && (
                 <div className="mb-8">
-                  <h3 className="font-body font-medium text-leather mb-3">Details</h3>
+                  <h3 className="font-body font-medium text-leather mb-3">
+                    Details
+                  </h3>
+
                   <ul className="space-y-2">
+                    {/* Show Design Type once */}
+                    {designTypeName && (
+                      <li key="designType" className="text-taupe text-sm">
+                        • {designTypeName} Design
+                      </li>
+                    )}
+
+                    {/* All other details */}
                     {product.details.map((d: any, index: number) => (
                       <li key={index} className="text-taupe text-sm">
                         • {d.detail}
@@ -237,11 +270,12 @@ const ProductDetail = () => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {relatedProducts
-                    .filter(p => p.uid !== productUid) // Exclude current product
+                    .filter((p) => p.uid !== productUid) // Exclude current product
                     .slice(0, 3) // Show maximum 3 related products
                     .map((item) => {
-                      const imageUrl = item.data.images?.[0]?.image?.url || '';
-                      const productCategory = item.data.category?.uid || 'collection';
+                      const imageUrl = item.data.images?.[0]?.image?.url || "";
+                      const productCategory =
+                        item.data.category?.uid || "collection";
 
                       return (
                         <motion.div
@@ -258,9 +292,9 @@ const ProductDetail = () => {
                                 uid: item.uid,
                                 category: {
                                   id: item.data.category?.id,
-                                  slug: productCategory
-                                }
-                              }
+                                  slug: productCategory,
+                                },
+                              },
                             }}
                           >
                             <div className="relative overflow-hidden rounded-lg shadow-soft hover:shadow-hover transition-all duration-500 mb-4">
@@ -268,19 +302,21 @@ const ProductDetail = () => {
                                 {imageUrl ? (
                                   <img
                                     src={imageUrl}
-                                    alt={item.data.name || 'Product'}
+                                    alt={item.data.name || "Product"}
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                   />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                    <span className="text-taupe">No image available</span>
+                                    <span className="text-taupe">
+                                      No image available
+                                    </span>
                                   </div>
                                 )}
                               </div>
                               <div className="absolute inset-0 bg-rosegold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             </div>
                             <h3 className="font-serif text-xl text-leather mb-1 tracking-elegant group-hover:text-rosegold transition-colors">
-                              {item.data.name || 'Unnamed Product'}
+                              {item.data.name || "Unnamed Product"}
                             </h3>
                           </Link>
                         </motion.div>
