@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,9 @@ const ProductDetail = () => {
 
   const [loading, setLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [showZoomModal, setShowZoomModal] = useState(false);
 
   // Inside your ProductDetails component, after the existing state
   const { products: relatedProducts, loading: relatedProductsLoading } =
@@ -112,6 +115,13 @@ const ProductDetail = () => {
   const designTypeName =
     product?.design_type?.data?.design_name?.[0]?.text;
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomPosition({ x, y });
+  };
+
   return (
     <div className="min-h-screen bg-ivory">
       <Navbar />
@@ -133,20 +143,36 @@ const ProductDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* IMAGE GALLERY */}
             <div className="relative">
-              <div className="relative aspect-square overflow-hidden rounded-lg mb-4">
+              <div 
+                className="relative aspect-square overflow-hidden rounded-lg mb-4 cursor-zoom-in"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={() => setIsZoomed(true)}
+                onMouseLeave={() => setIsZoomed(false)}
+                onClick={() => setShowZoomModal(true)}
+              >
                 <AnimatePresence mode="wait">
                   <motion.div className="relative w-full h-full">
                     <motion.img
                       key={currentImage}
                       src={images[currentImage]}
                       alt={productName}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-200"
+                      style={{
+                        transform: isZoomed ? 'scale(2)' : 'scale(1)',
+                        transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                      }}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                     />
                   </motion.div>
                 </AnimatePresence>
+                
+                {/* Zoom Indicator */}
+                <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-xs flex items-center gap-1 pointer-events-none">
+                  <ZoomIn className="w-3 h-3" />
+                  <span>Click to enlarge</span>
+                </div>
 
                 {/* Slider Arrows */}
                 {images.length > 1 && (
@@ -358,6 +384,68 @@ const ProductDetail = () => {
       </main>
 
       <Footer />
+      
+      {/* Zoom Modal */}
+      <AnimatePresence>
+        {showZoomModal && images.length > 0 && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowZoomModal(false)}
+          >
+            <button
+              className="absolute top-4 right-4 text-white hover:text-rosegold transition-colors z-10"
+              onClick={() => setShowZoomModal(false)}
+            >
+              <X className="w-8 h-8" />
+            </button>
+            
+            <div className="relative max-w-6xl max-h-[90vh] w-full h-full flex items-center justify-center">
+              <motion.img
+                src={images[currentImage]}
+                alt={`${productName} - Enlarged`}
+                className="max-w-full max-h-full object-contain"
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.8 }}
+                transition={{ duration: 0.3 }}
+                onClick={(e) => e.stopPropagation()}
+              />
+              
+              {/* Navigation in Modal */}
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImage((i) => i === 0 ? images.length - 1 : i - 1);
+                    }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition-all"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImage((i) => i === images.length - 1 ? 0 : i + 1);
+                    }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition-all"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </>
+              )}
+              
+              {/* Image Counter */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
+                {currentImage + 1} / {images.length}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
